@@ -32,33 +32,61 @@ class FirebaseService {
     return null;
   }
 
-  Future<UserModel?> createUserWithEmailAndPassword(String email, String password) async {
+  Future<UserModel?> createUserWithEmailAndPassword(
+    String email,
+    String password,
+    String displayName,
+  ) async {
     try {
+      // Step 1: Create the Firebase Auth user
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      print("User created");
+
       final user = userCredential.user;
       if (user != null) {
-        final now = DateTime.now();
-        final newUser = UserModel(
-          id: user.uid,
-          email: email,
-          displayName: email.split('@')[0],
-          photoUrl: null,
-          createdAt: now,
-          lastLogin: now,
-          enrolledCourses: [],
-          progress: {},
-        );
+        try {
+          // Step 2: Create a UserModel object
+          final now = DateTime.now();
+          final newUser = UserModel(
+            id: user.uid,
+            email: email,
+            displayName: displayName,
+            photoUrl: null,
+            createdAt: now,
+            lastLogin: now,
+            enrolledCourses: [],
+            progress: {},
+          );
 
-        await _firestore.collection('users').doc(user.uid).set(newUser.toJson());
-        return newUser;
+          // Step 3: Create the user document in Firestore
+          // Convert to Map explicitly to avoid type casting issues
+          final userData = {
+            'id': newUser.id,
+            'email': newUser.email,
+            'displayName': newUser.displayName,
+            'photoUrl': newUser.photoUrl,
+            'createdAt': newUser.createdAt.toIso8601String(),
+            'lastLogin': newUser.lastLogin.toIso8601String(),
+            'enrolledCourses': [], // Empty array instead of using the model
+            'progress': {}, // Empty map instead of using the model
+          };
+
+          await _firestore.collection('users').doc(user.uid).set(userData);
+          return newUser;
+        } catch (firestoreError) {
+          // If Firestore operation fails, delete the auth user to avoid orphaned accounts
+          print('Error creating user document: $firestoreError');
+          await user.delete();
+          rethrow;
+        }
       }
     } catch (e) {
       print('Error creating user: $e');
-      return null;
+      rethrow;
     }
 
     return null;
@@ -92,13 +120,14 @@ class FirebaseService {
 
   Future<List<CourseModel>> getAllCourses() async {
     final snapshot = await _firestore.collection('courses').get();
-    return snapshot.docs.map((doc) => CourseModel.fromJson(doc.data())).toList();
+    print(snapshot.docs.map((doc) => doc.data()));
+    return snapshot.docs.map((doc) => CourseModel.fromJson(doc.id, doc.data())).toList();
   }
 
   Future<CourseModel?> getCourse(String courseId) async {
     final doc = await _firestore.collection('courses').doc(courseId).get();
     if (!doc.exists) return null;
-    return CourseModel.fromJson(doc.data()!);
+    return CourseModel.fromJson(doc.id, doc.data()!);
   }
 
   Future<List<CourseModel>> getUserCourses(String userId) async {
@@ -116,7 +145,7 @@ class FirebaseService {
             .where(FieldPath.documentId, whereIn: enrolledCourses)
             .get();
 
-    return coursesSnapshot.docs.map((doc) => CourseModel.fromJson(doc.data())).toList();
+    return coursesSnapshot.docs.map((doc) => CourseModel.fromJson(doc.id, doc.data())).toList();
   }
 
   Future<void> enrollInCourse(String userId, String courseId) async {

@@ -51,7 +51,10 @@ class LocalStorageService {
     final box = Hive.box(_coursesBox);
     final coursesJson = box.get('allCourses', defaultValue: []);
     if (coursesJson.isEmpty) return [];
-    return (coursesJson as List).map((courseJson) => CourseModel.fromJson(jsonDecode(courseJson))).toList();
+    return (coursesJson as List).map((courseJson) {
+      final decoded = jsonDecode(courseJson);
+      return CourseModel.fromJson(decoded['id'], decoded);
+    }).toList();
   }
 
   static Future<CourseModel?> getCourse(String courseId) async {
@@ -79,29 +82,37 @@ class LocalStorageService {
   }
 
   // Progress methods
-  static Future<void> saveProgress(String userId, String courseId, Map<String, dynamic> progress) async {
+  static Future<void> saveProgress(
+    String userId,
+    String courseId,
+    Map<String, dynamic> progress,
+  ) async {
     final box = Hive.box(_progressBox);
-    final key = '${userId}_${courseId}';
+    final key = '${userId}_$courseId';
     await box.put(key, jsonEncode(progress));
   }
 
   static Future<Map<String, dynamic>?> getProgress(String userId, String courseId) async {
     final box = Hive.box(_progressBox);
-    final key = '${userId}_${courseId}';
+    final key = '${userId}_$courseId';
     final progressJson = box.get(key);
     if (progressJson == null) return null;
     return jsonDecode(progressJson);
   }
 
-  static Future<void> saveTestResult(String userId, String testId, Map<String, dynamic> result) async {
+  static Future<void> saveTestResult(
+    String userId,
+    String testId,
+    Map<String, dynamic> result,
+  ) async {
     final box = Hive.box(_progressBox);
-    final key = '${userId}_test_${testId}';
+    final key = '${userId}_test_$testId';
     await box.put(key, jsonEncode(result));
   }
 
   static Future<Map<String, dynamic>?> getTestResult(String userId, String testId) async {
     final box = Hive.box(_progressBox);
-    final key = '${userId}_test_${testId}';
+    final key = '${userId}_test_$testId';
     final resultJson = box.get(key);
     if (resultJson == null) return null;
     return jsonDecode(resultJson);

@@ -56,7 +56,11 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   Future<void> signUp(String email, String password, String displayName) async {
     state = const AsyncValue.loading();
     try {
-      final userModel = await _firebaseService.createUserWithEmailAndPassword(email, password);
+      final userModel = await _firebaseService.createUserWithEmailAndPassword(
+        email,
+        password,
+        displayName,
+      );
 
       if (userModel != null) {
         await LocalStorageService.saveUser(userModel);

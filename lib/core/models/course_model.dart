@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class CourseModel {
   final String id;
   final String title;
@@ -25,9 +27,9 @@ class CourseModel {
     required this.updatedAt,
   });
 
-  factory CourseModel.fromJson(Map<String, dynamic> json) {
+  factory CourseModel.fromJson(String id, Map<String, dynamic> json) {
     return CourseModel(
-      id: json['id'] as String,
+      id: id,
       title: json['title'] as String,
       description: json['description'] as String,
       imageUrl: json['imageUrl'] as String,
@@ -35,12 +37,19 @@ class CourseModel {
       durationMinutes: json['durationMinutes'] as int,
       level: json['level'] as String,
       tags: List<String>.from(json['tags'] ?? []),
-      lessons: (json['lessons'] as List<dynamic>?)
-          ?.map((e) => LessonModel.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      lessons:
+          (json['lessons'] as List<dynamic>?)
+              ?.map((e) => LessonModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
           [],
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt:
+          json['createdAt'] is String
+              ? DateTime.parse(json['createdAt'] as String)
+              : (json['createdAt'] as Timestamp).toDate(),
+      updatedAt:
+          json['updatedAt'] is String
+              ? DateTime.parse(json['updatedAt'] as String)
+              : (json['updatedAt'] as Timestamp).toDate(),
     );
   }
 

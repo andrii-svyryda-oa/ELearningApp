@@ -11,6 +11,10 @@ class AppTheme {
       secondary: const Color(0xFF344955),
       tertiary: const Color(0xFFF9AA33),
     ),
+    tabBarTheme: const TabBarTheme(
+      labelColor: Colors.white,
+      unselectedLabelColor: Color.fromARGB(255, 224, 224, 224),
+    ),
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF4A6572),
