@@ -1,8 +1,8 @@
+import 'package:e_learning_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:e_learning_app/features/auth/controllers/auth_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -38,16 +38,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     try {
-      await ref.read(authControllerProvider.notifier).signUp(
+      await ref
+          .read(authControllerProvider.notifier)
+          .signUp(
             _emailController.text.trim(),
             _passwordController.text,
             _nameController.text.trim(),
           );
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } catch (e) {
+      print('Error creating user: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text('Registration failed: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -64,11 +71,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.registerTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.registerTitle)),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -83,18 +88,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Icons.app_registration,
                     size: 64,
                     color: Color(0xFF4A6572),
-                  )
-                      .animate()
-                      .fadeIn(duration: 600.ms)
-                      .scale(delay: 200.ms),
+                  ).animate().fadeIn(duration: 600.ms).scale(delay: 200.ms),
                   const SizedBox(height: 24),
                   Text(
                     l10n.registerTitle,
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
-                  )
-                      .animate()
-                      .fadeIn(delay: 300.ms),
+                  ).animate().fadeIn(delay: 300.ms),
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: _nameController,
@@ -108,10 +108,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       }
                       return null;
                     },
-                  )
-                      .animate()
-                      .fadeIn(delay: 400.ms)
-                      .slideX(begin: -0.1, end: 0),
+                  ).animate().fadeIn(delay: 400.ms).slideX(begin: -0.1, end: 0),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
@@ -124,16 +121,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value)) {
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                         return 'Please enter a valid email';
                       }
                       return null;
                     },
-                  )
-                      .animate()
-                      .fadeIn(delay: 500.ms)
-                      .slideX(begin: 0.1, end: 0),
+                  ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
@@ -141,11 +134,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       labelText: l10n.password,
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
+                        icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
@@ -163,10 +152,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       }
                       return null;
                     },
-                  )
-                      .animate()
-                      .fadeIn(delay: 600.ms)
-                      .slideX(begin: -0.1, end: 0),
+                  ).animate().fadeIn(delay: 600.ms).slideX(begin: -0.1, end: 0),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _confirmPasswordController,
@@ -175,9 +161,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                          _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -196,23 +180,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       }
                       return null;
                     },
-                  )
-                      .animate()
-                      .fadeIn(delay: 700.ms)
-                      .slideX(begin: 0.1, end: 0),
+                  ).animate().fadeIn(delay: 700.ms).slideX(begin: 0.1, end: 0),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _register,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : Text(l10n.registerButton),
-                  )
-                      .animate()
-                      .fadeIn(delay: 800.ms)
-                      .slideY(begin: 0.1, end: 0),
+                    child:
+                        _isLoading ? const CircularProgressIndicator() : Text(l10n.registerButton),
+                  ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -225,9 +202,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         child: Text(l10n.loginButton),
                       ),
                     ],
-                  )
-                      .animate()
-                      .fadeIn(delay: 900.ms),
+                  ).animate().fadeIn(delay: 900.ms),
                 ],
               ),
             ),

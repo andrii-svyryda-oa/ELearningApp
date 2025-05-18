@@ -16,33 +16,27 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     initialLocation: '/courses',
-    // redirect: (context, state) {
-    //   final isLoggedIn = authState.value != null;
-    //   final isAuthRoute = state.matchedLocation == '/login' ||
-    //                      state.matchedLocation == '/register';
+    redirect: (context, state) {
+      final isLoggedIn = authState.value != null;
+      final isAuthRoute = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
-    //   // If not logged in and not on auth route, redirect to login
-    //   if (!isLoggedIn && !isAuthRoute) {
-    //     return '/login';
-    //   }
+      if (!isLoggedIn && !isAuthRoute) {
+        return '/login';
+      }
 
-    //   // If logged in and on auth route, redirect to home
-    //   if (isLoggedIn && isAuthRoute) {
-    //     return '/courses';
-    //   }
+      if (isLoggedIn && isAuthRoute) {
+        return '/courses';
+      }
 
-    //   return null;
-    // },
+      return null;
+    },
     routes: [
-      // Auth routes
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
 
-      // Main app routes with bottom navigation
       ShellRoute(
         builder: (context, state, child) => MainScaffold(child: child),
         routes: [
-          // Courses routes
           GoRoute(
             path: '/courses',
             builder: (context, state) => const CoursesListScreen(),
@@ -73,13 +67,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Tests routes
           GoRoute(
             path: '/tests',
             builder: (context, state) => const TestsListScreen(courseId: 'all'),
           ),
 
-          // Profile routes
           GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
         ],
       ),

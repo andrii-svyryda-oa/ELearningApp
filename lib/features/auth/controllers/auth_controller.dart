@@ -59,7 +59,6 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
       final userModel = await _firebaseService.createUserWithEmailAndPassword(email, password);
 
       if (userModel != null) {
-        // The user model is already created by the firebase service
         await LocalStorageService.saveUser(userModel);
         state = AsyncValue.data(userModel);
       }

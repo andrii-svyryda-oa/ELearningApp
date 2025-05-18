@@ -1,10 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:e_learning_app/core/models/course_model.dart';
+import 'package:e_learning_app/features/courses/controllers/courses_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:e_learning_app/features/courses/controllers/courses_controller.dart';
-import 'package:e_learning_app/core/models/course_model.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CoursesListScreen extends ConsumerStatefulWidget {
   const CoursesListScreen({super.key});
@@ -13,7 +13,8 @@ class CoursesListScreen extends ConsumerStatefulWidget {
   ConsumerState<CoursesListScreen> createState() => _CoursesListScreenState();
 }
 
-class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with SingleTickerProviderStateMixin {
+class _CoursesListScreenState extends ConsumerState<CoursesListScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -42,10 +43,7 @@ class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with Sing
         title: Text(l10n.courses),
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
-            Tab(text: l10n.allCourses),
-            Tab(text: l10n.myCourses),
-          ],
+          tabs: [Tab(text: l10n.allCourses), Tab(text: l10n.myCourses)],
         ),
       ),
       body: Column(
@@ -57,9 +55,7 @@ class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with Sing
               decoration: InputDecoration(
                 hintText: l10n.searchHint,
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
               onChanged: (value) {
@@ -73,18 +69,14 @@ class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with Sing
             child: TabBarView(
               controller: _tabController,
               children: [
-                // All Courses Tab
                 allCourses.when(
                   data: (courses) {
                     final filteredCourses = _filterCourses(courses);
                     return _buildCoursesList(filteredCourses);
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, stackTrace) => Center(
-                    child: Text('Error: ${error.toString()}'),
-                  ),
+                  error: (error, stackTrace) => Center(child: Text('Error: ${error.toString()}')),
                 ),
-                // My Courses Tab
                 userCourses.when(
                   data: (courses) {
                     final filteredCourses = _filterCourses(courses);
@@ -93,9 +85,7 @@ class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with Sing
                         : _buildCoursesList(filteredCourses);
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, stackTrace) => Center(
-                    child: Text('Error: ${error.toString()}'),
-                  ),
+                  error: (error, stackTrace) => Center(child: Text('Error: ${error.toString()}')),
                 ),
               ],
             ),
@@ -107,7 +97,7 @@ class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with Sing
 
   List<CourseModel> _filterCourses(List<CourseModel> courses) {
     if (_searchQuery.isEmpty) return courses;
-    
+
     return courses.where((course) {
       return course.title.toLowerCase().contains(_searchQuery) ||
           course.description.toLowerCase().contains(_searchQuery) ||
@@ -117,9 +107,7 @@ class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with Sing
 
   Widget _buildCoursesList(List<CourseModel> courses) {
     if (courses.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.noCoursesFound),
-      );
+      return Center(child: Text(AppLocalizations.of(context)!.noCoursesFound));
     }
 
     return RefreshIndicator(
@@ -140,95 +128,95 @@ class _CoursesListScreenState extends ConsumerState<CoursesListScreen> with Sing
 
   Widget _buildCourseCard(CourseModel course, int index) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          // Navigate to course details
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: CachedNetworkImage(
-                imageUrl: course.imageUrl,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 180,
-                  color: Colors.grey[300],
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  height: 180,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.error),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    course.title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+          margin: const EdgeInsets.only(bottom: 16),
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: InkWell(
+            onTap: () {
+              // Navigate to course details
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: CachedNetworkImage(
+                    imageUrl: course.imageUrl,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder:
+                        (context, url) => Container(
+                          height: 180,
+                          color: Colors.grey[300],
+                          child: const Center(child: CircularProgressIndicator()),
+                        ),
+                    errorWidget:
+                        (context, url, error) => Container(
+                          height: 180,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.error),
+                        ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    course.description,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
                       Text(
-                        '${course.durationMinutes} min',
-                        style: TextStyle(color: Colors.grey[600]),
+                        course.title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 16),
-                      Icon(Icons.bar_chart, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
+                      const SizedBox(height: 8),
                       Text(
-                        course.level,
-                        style: TextStyle(color: Colors.grey[600]),
+                        course.description,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${course.durationMinutes} min',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          const SizedBox(width: 16),
+                          Icon(Icons.bar_chart, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(course.level, style: TextStyle(color: Colors.grey[600])),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children:
+                            course.tags
+                                .map(
+                                  (tag) => Chip(
+                                    label: Text(tag),
+                                    labelStyle: const TextStyle(fontSize: 12),
+                                    padding: EdgeInsets.zero,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                )
+                                .toList(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: course.tags
-                        .map(
-                          (tag) => Chip(
-                            label: Text(tag),
-                            labelStyle: const TextStyle(fontSize: 12),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    )
+          ),
+        )
         .animate()
         .fadeIn(delay: Duration(milliseconds: 100 * index))
         .slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: 100 * index));

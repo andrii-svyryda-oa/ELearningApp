@@ -1,31 +1,24 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:e_learning_app/core/models/user_model.dart';
 import 'package:e_learning_app/core/models/course_model.dart';
 import 'package:e_learning_app/core/models/test_model.dart';
+import 'package:e_learning_app/core/models/user_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class FirebaseService {
-  // Use Firebase instances
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  
 
-
-  // Authentication methods
   Future<UserModel?> signInWithEmailAndPassword(String email, String password) async {
-    
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
-      // Convert to UserModel
+
       final user = userCredential.user;
       if (user != null) {
-        // Fetch user data from Firestore
         final userData = await _firestore.collection('users').doc(user.uid).get();
         if (userData.exists) {
           return UserModel.fromJson(userData.data()!);
@@ -35,19 +28,17 @@ class FirebaseService {
       print('Error signing in: $e');
       return null;
     }
-    
+
     return null;
   }
 
   Future<UserModel?> createUserWithEmailAndPassword(String email, String password) async {
-    
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
-      // Convert to UserModel
+
       final user = userCredential.user;
       if (user != null) {
         final now = DateTime.now();
@@ -61,8 +52,7 @@ class FirebaseService {
           enrolledCourses: [],
           progress: {},
         );
-        
-        // Save to Firestore
+
         await _firestore.collection('users').doc(user.uid).set(newUser.toJson());
         return newUser;
       }
@@ -70,7 +60,7 @@ class FirebaseService {
       print('Error creating user: $e');
       return null;
     }
-    
+
     return null;
   }
 
@@ -86,7 +76,6 @@ class FirebaseService {
     return _auth.currentUser;
   }
 
-  // User methods
   Future<void> createUserProfile(UserModel user) async {
     return await _firestore.collection('users').doc(user.id).set(user.toJson());
   }
@@ -101,12 +90,9 @@ class FirebaseService {
     return await _firestore.collection('users').doc(user.id).update(user.toJson());
   }
 
-  // Course methods
   Future<List<CourseModel>> getAllCourses() async {
     final snapshot = await _firestore.collection('courses').get();
-    return snapshot.docs
-        .map((doc) => CourseModel.fromJson(doc.data()))
-        .toList();
+    return snapshot.docs.map((doc) => CourseModel.fromJson(doc.data())).toList();
   }
 
   Future<CourseModel?> getCourse(String courseId) async {
@@ -118,20 +104,19 @@ class FirebaseService {
   Future<List<CourseModel>> getUserCourses(String userId) async {
     final userDoc = await _firestore.collection('users').doc(userId).get();
     if (!userDoc.exists) return [];
-    
+
     final userData = userDoc.data()!;
     final enrolledCourses = List<String>.from(userData['enrolledCourses'] ?? []);
-    
+
     if (enrolledCourses.isEmpty) return [];
-    
-    final coursesSnapshot = await _firestore
-        .collection('courses')
-        .where(FieldPath.documentId, whereIn: enrolledCourses)
-        .get();
-    
-    return coursesSnapshot.docs
-        .map((doc) => CourseModel.fromJson(doc.data()))
-        .toList();
+
+    final coursesSnapshot =
+        await _firestore
+            .collection('courses')
+            .where(FieldPath.documentId, whereIn: enrolledCourses)
+            .get();
+
+    return coursesSnapshot.docs.map((doc) => CourseModel.fromJson(doc.data())).toList();
   }
 
   Future<void> enrollInCourse(String userId, String courseId) async {
@@ -140,16 +125,11 @@ class FirebaseService {
     });
   }
 
-  // Test methods
   Future<List<TestModel>> getTestsForCourse(String courseId) async {
-    final snapshot = await _firestore
-        .collection('tests')
-        .where('courseId', isEqualTo: courseId)
-        .get();
-    
-    return snapshot.docs
-        .map((doc) => TestModel.fromJson(doc.data()))
-        .toList();
+    final snapshot =
+        await _firestore.collection('tests').where('courseId', isEqualTo: courseId).get();
+
+    return snapshot.docs.map((doc) => TestModel.fromJson(doc.data())).toList();
   }
 
   Future<TestModel?> getTest(String testId) async {
@@ -158,28 +138,30 @@ class FirebaseService {
     return TestModel.fromJson(doc.data()!);
   }
 
-  // Progress methods
-  Future<void> saveUserProgress(String userId, String courseId, Map<String, dynamic> progress) async {
-    return await _firestore.collection('progress').doc('${userId}_${courseId}').set(progress);
+  Future<void> saveUserProgress(
+    String userId,
+    String courseId,
+    Map<String, dynamic> progress,
+  ) async {
+    return await _firestore.collection('progress').doc('${userId}_$courseId').set(progress);
   }
 
   Future<Map<String, dynamic>?> getUserProgress(String userId, String courseId) async {
-    final doc = await _firestore.collection('progress').doc('${userId}_${courseId}').get();
+    final doc = await _firestore.collection('progress').doc('${userId}_$courseId').get();
     if (!doc.exists) return null;
     return doc.data() as Map<String, dynamic>;
   }
 
   Future<void> saveTestResult(String userId, String testId, Map<String, dynamic> result) async {
-    return await _firestore.collection('test_results').doc('${userId}_${testId}').set(result);
+    return await _firestore.collection('test_results').doc('${userId}_$testId').set(result);
   }
 
   Future<Map<String, dynamic>?> getTestResult(String userId, String testId) async {
-    final doc = await _firestore.collection('test_results').doc('${userId}_${testId}').get();
+    final doc = await _firestore.collection('test_results').doc('${userId}_$testId').get();
     if (!doc.exists) return null;
     return doc.data() as Map<String, dynamic>;
   }
 
-  // Storage methods
   Future<String> uploadFile(String path, dynamic file) async {
     final ref = _storage.ref().child(path);
     final uploadTask = await ref.putFile(file);

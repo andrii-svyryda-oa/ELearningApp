@@ -3,6 +3,7 @@ import 'package:e_learning_app/core/theme/app_theme.dart';
 import 'package:e_learning_app/core/theme/theme_provider.dart';
 import 'package:e_learning_app/core/utils/locale_provider.dart';
 import 'package:e_learning_app/core/utils/router.dart';
+import 'package:e_learning_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -12,10 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase only on supported platforms
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
 
-  // Initialize Hive for local storage
   await LocalStorageService.init();
 
   runApp(const ProviderScope(child: ELearningApp()));
@@ -36,7 +35,7 @@ class ELearningApp extends ConsumerWidget {
 
       // Theme configuration
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
 
       // Localization configuration
