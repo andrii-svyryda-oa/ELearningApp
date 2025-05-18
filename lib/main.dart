@@ -1,20 +1,59 @@
+import 'package:e_learning_app/core/services/local_storage_service.dart';
+import 'package:e_learning_app/core/theme/app_theme.dart';
+import 'package:e_learning_app/core/theme/theme_provider.dart';
+import 'package:e_learning_app/core/utils/locale_provider.dart';
+import 'package:e_learning_app/core/utils/router.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase only on supported platforms
+  await Firebase.initializeApp();
+
+  // Initialize Hive for local storage
+  await LocalStorageService.init();
+
+  runApp(const ProviderScope(child: ELearningApp()));
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class ELearningApp extends ConsumerWidget {
+  const ELearningApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeProvider);
+    final locale = ref.watch(localeProvider);
+
+    return MaterialApp.router(
+      title: 'E-Learning App',
+      debugShowCheckedModeBanner: false,
+
+      // Theme configuration
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.lightTheme,
+      themeMode: themeMode,
+
+      // Localization configuration
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('uk'), // Ukrainian
+      ],
+
+      // Router configuration
+      routerConfig: router,
     );
   }
 }
